@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 import asyncio
 import redis.asyncio as redis
+import asyncpg
 
 SECRET_KEY = "dev-secret-key-change-in-production"
 ALGORITHM = "HS256"
@@ -47,10 +48,38 @@ async def get_redis():
         _redis = redis.Redis(host='redis', port=6379, db=0)
     return _redis
 
+# ---- Real status checker ----
+async def check_redis():
+    try:
+        r = await get_redis()
+        await r.ping()
+        return "OK"
+    except:
+        return "DOWN"
+
+async def check_postgres():
+    try:
+        conn = await asyncpg.connect(user='slh', password='slh', database='slh', host='postgres')
+        await conn.execute('SELECT 1')
+        await conn.close()
+        return "OK"
+    except:
+        return "DOWN"
+
 @app.get("/status")
 async def status():
-    return {"services":"9/9 ONLINE","bots":"6 ACTIVE","treasury":"$124,500","redis":"OK","postgres":"OK","agents":"4 RUNNING"}
+    redis_status = await check_redis()
+    postgres_status = await check_postgres()
+    return {
+        "services": "ACTIVE",
+        "bots": "--",
+        "treasury": "--",
+        "redis": redis_status,
+        "postgres": postgres_status,
+        "agents": "IDLE"
+    }
 
+# ---- Auth ----
 @app.post("/login", response_model=Token)
 async def login(username: str, password: str):
     user = authenticate_user(fake_users_db, username, password)
@@ -69,6 +98,7 @@ async def read_users_me(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401)
     return {"username": username}
 
+# ---- Event Bus ----
 @app.post("/event")
 async def publish_event(event_type: str, payload: str = ""):
     r = await get_redis()
@@ -87,15 +117,24 @@ async def event_stream(websocket: WebSocket):
                 for msg_id, msg in messages:
                     await websocket.send_json({k.decode(): v.decode() for k, v in msg.items()})
                     last_id = msg_id
-        except Exception:
+        except:
             break
 
+# ---- Live status WebSocket ----
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            await websocket.send_json({"services":"9/9 ONLINE","bots":"6 ACTIVE","treasury":"$124,500","redis":"OK","postgres":"OK","agents":"4 RUNNING"})
+            status_data = {
+                "services": "ACTIVE",
+                "bots": "--",
+                "treasury": "--",
+                "redis": await check_redis(),
+                "postgres": await check_postgres(),
+                "agents": "IDLE"
+            }
+            await websocket.send_json(status_data)
             await asyncio.sleep(5)
     except WebSocketDisconnect:
         pass

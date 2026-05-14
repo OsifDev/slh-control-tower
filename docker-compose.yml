@@ -4,7 +4,7 @@ services:
     image: python:3.11-slim
     container_name: slh-gateway
     working_dir: /app
-    command: sh -c "pip install fastapi uvicorn python-jose[cryptography] redis websockets && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    command: sh -c "pip install fastapi uvicorn python-jose[cryptography] redis asyncpg websockets && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     ports:
       - "8000:8000"
     volumes:
@@ -15,6 +15,16 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - DATABASE_URL=postgresql://slh:slh@postgres:5432/slh
+
+  ai-runtime:
+    image: python:3.11-slim
+    container_name: slh-ai-runtime
+    working_dir: /app
+    command: sh -c "pip install -r requirements.txt && python agent.py"
+    volumes:
+      - ./ai-runtime:/app
+    depends_on:
+      - redis
 
   frontend:
     image: node:18-alpine

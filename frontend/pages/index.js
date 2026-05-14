@@ -48,12 +48,12 @@ export default function Dashboard() {
   }, []);
 
   const bots = [
-    { name: 'Guardian', status: 'Active' },
-    { name: 'Wallet', status: 'Active' },
-    { name: 'Airdrop', status: 'Active' },
-    { name: 'Game', status: 'Active' },
-    { name: 'Analytics', status: 'Active' },
-    { name: 'Notifier', status: 'Active' },
+    { name: 'Guardian', status: status.bots === '--' ? 'Offline' : 'Active' },
+    { name: 'Wallet', status: status.bots === '--' ? 'Offline' : 'Active' },
+    { name: 'Airdrop', status: status.bots === '--' ? 'Offline' : 'Active' },
+    { name: 'Game', status: status.bots === '--' ? 'Offline' : 'Active' },
+    { name: 'Analytics', status: status.bots === '--' ? 'Offline' : 'Active' },
+    { name: 'Notifier', status: status.bots === '--' ? 'Offline' : 'Active' },
   ];
 
   return (
@@ -68,43 +68,43 @@ export default function Dashboard() {
 
       <main className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <p className="text-gray-400 text-xs uppercase">Services</p>
-            <p className="text-2xl font-bold text-green-400">{status.services || '...'}</p>
-          </motion.div>
-          <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.1 }} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+            <p className="text-2xl font-bold text-green-400">{status.services || '--'}</p>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <p className="text-gray-400 text-xs uppercase">Bots Active</p>
-            <p className="text-2xl font-bold text-blue-400">{status.bots || '...'}</p>
-          </motion.div>
-          <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.2 }} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+            <p className="text-2xl font-bold text-blue-400">{status.bots || '--'}</p>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <p className="text-gray-400 text-xs uppercase">Treasury</p>
-            <p className="text-2xl font-bold text-yellow-400">{status.treasury || '...'}</p>
-          </motion.div>
-          <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.3 }} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+            <p className="text-2xl font-bold text-yellow-400">{status.treasury || '--'}</p>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <p className="text-gray-400 text-xs uppercase">AI Agents</p>
-            <p className="text-2xl font-bold text-purple-400">{status.agents || '...'}</p>
-          </motion.div>
-          <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.4 }} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+            <p className="text-2xl font-bold text-purple-400">{status.agents || '--'}</p>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <p className="text-gray-400 text-xs uppercase">Redis</p>
-            <p className={`text-2xl font-bold ${status.redis==='OK'?'text-green-400':'text-red-400'}`}>{status.redis || '...'}</p>
-          </motion.div>
-          <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.5 }} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+            <p className={`text-2xl font-bold ${status.redis==='OK'?'text-green-400':'text-red-400'}`}>{status.redis || '--'}</p>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <p className="text-gray-400 text-xs uppercase">Postgres</p>
-            <p className={`text-2xl font-bold ${status.postgres==='OK'?'text-green-400':'text-red-400'}`}>{status.postgres || '...'}</p>
-          </motion.div>
+            <p className={`text-2xl font-bold ${status.postgres==='OK'?'text-green-400':'text-red-400'}`}>{status.postgres || '--'}</p>
+          </div>
         </div>
 
-        <motion.div initial={{ opacity:0, x:20 }} animate={{ opacity:1, x:0 }} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
           <h2 className="text-lg font-semibold mb-3">Telegram Bots</h2>
           <div className="space-y-2">
             {bots.map((bot, i) => (
               <div key={i} className="flex justify-between text-sm border-b border-gray-800 py-1">
                 <span>{bot.name}</span>
-                <span className="text-green-400">● {bot.status}</span>
+                <span className={bot.status === 'Active' ? 'text-green-400' : 'text-red-400'}>● {bot.status}</span>
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         <div className="lg:col-span-3 bg-gray-900 border border-gray-800 rounded-xl p-4">
           <h2 className="text-lg font-semibold mb-3">Live Event Stream</h2>
