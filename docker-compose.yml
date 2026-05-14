@@ -1,0 +1,64 @@
+﻿version: '3.8'
+services:
+  gateway:
+    image: python:3.11-slim
+    container_name: slh-gateway
+    working_dir: /app
+    command: sh -c "pip install fastapi uvicorn && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./gateway:/app
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://slh:slh@postgres:5432/slh
+
+  frontend:
+    image: node:18-alpine
+    container_name: slh-control-tower
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+
+  redis:
+    image: redis:7-alpine
+    container_name: slh-redis
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: slh-postgres
+    environment:
+      POSTGRES_USER: slh
+      POSTGRES_PASSWORD: slh
+      POSTGRES_DB: slh
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  prometheus:
+    image: prom/prometheus
+    container_name: slh-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    container_name: slh-grafana
+    ports:
+      - "3001:3000"
+
+volumes:
+  pgdata:
