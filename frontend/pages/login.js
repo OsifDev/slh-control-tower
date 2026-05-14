@@ -18,32 +18,35 @@ export default function Login() {
       localStorage.setItem('access_token', data.access_token);
       router.push('/');
     } else {
-      setError('Login failed. Check credentials.');
+      setError('Authentication failed. Check credentials.');
     }
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '5rem auto', padding: 20, fontFamily: 'sans-serif' }}>
-      <h1>SLH Control Tower</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 8 }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 8 }}
-        />
-        <button type="submit" style={{ padding: 8, width: '100%' }}>Login</button>
-      </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <p>Demo: admin / secret</p>
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 w-full max-w-sm">
+        <h1 className="text-xl font-bold text-white mb-6 text-center">SLH Control Tower</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
+          />
+          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition-colors">
+            Login
+          </button>
+        </form>
+        {error && <p className="text-red-400 text-sm mt-4 text-center">{error}</p>}
+      </div>
     </div>
   );
 }

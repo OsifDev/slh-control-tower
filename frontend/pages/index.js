@@ -16,7 +16,13 @@ function Clock() {
 export default function Dashboard() {
   const [status, setStatus] = useState({});
   const [events, setEvents] = useState([]);
+  const [wsConnected, setWsConnected] = useState(false);
   const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    router.push('/login');
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -31,15 +37,16 @@ export default function Dashboard() {
       .catch(() => router.push('/login'));
 
     const wsStatus = new WebSocket('ws://localhost:8000/ws');
+    wsStatus.onopen = () => setWsConnected(true);
     wsStatus.onmessage = (event) => setStatus(JSON.parse(event.data));
-    wsStatus.onerror = () => console.log('Status WS error');
+    wsStatus.onerror = () => setWsConnected(false);
+    wsStatus.onclose = () => setWsConnected(false);
 
     const wsEvents = new WebSocket('ws://localhost:8000/ws/events');
     wsEvents.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setEvents(prev => [data, ...prev].slice(0, 10));
     };
-    wsEvents.onerror = () => console.log('Event WS error');
 
     return () => {
       wsStatus.close();
@@ -59,11 +66,17 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-950 text-white font-sans">
       <header className="flex justify-between items-center p-4 border-b border-gray-800">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-blue-600 rounded-full"></div>
           <h1 className="text-xl font-bold">SLH CONTROL TOWER</h1>
+          <span className={`w-2 h-2 rounded-full ${wsConnected ? 'bg-green-500' : 'bg-red-500'}`} title={wsConnected ? 'Live' : 'Disconnected'}></span>
         </div>
-        <Clock />
+        <div className="flex items-center gap-4">
+          <Clock />
+          <button onClick={handleLogout} className="text-sm text-gray-400 hover:text-white border border-gray-700 rounded-lg px-3 py-1 transition-colors">
+            Logout
+          </button>
+        </div>
       </header>
 
       <main className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
